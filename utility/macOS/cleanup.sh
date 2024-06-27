@@ -129,6 +129,17 @@ update_nvm_node() {
     }
 }
 
+# macOS clear trash
+clear_trash() {
+    print_message "Clearing Trash" "$info_color"
+    {
+        sudo rm -rf ~/.Trash/*
+    } || {
+        print_message "Error clearing Trash" "$error_color"
+        return 1
+    }
+}
+
 # Function to update Yarn
 update_yarn() {
     print_message "Updating Yarn" "$info_color"
