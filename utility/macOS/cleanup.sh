@@ -119,6 +119,8 @@ check_issues() {
 update_nvm_node() {
     print_message "Updating nvm and node" "$info_color"
     {
+        export NVM_DIR=~/.nvm
+        source ~/.nvm/nvm.sh
         nvm install --reinstall-packages-from=current 'lts/*'
         nvm alias default 'lts/*'
         nvm use 'lts/*'
@@ -132,21 +134,33 @@ update_nvm_node() {
 # macOS clear trash
 clear_trash() {
     print_message "Clearing Trash" "$info_color"
+    # print yellow message saying it will remove all files in the trash and it is not reversible
+    print_message "This will remove all files in the Trash and it is not reversible" "$warning_color"
+    read -p "Do you want to continue? (y/n): " confirm
+    [[ $confirm != "y" ]] && return 1
     {
-        sudo rm -rf ~/.Trash/*
+        sudo rm -rvf ~/.Trash/* 
     } || {
         print_message "Error clearing Trash" "$error_color"
         return 1
     }
 }
 
-# Function to update Yarn
-update_yarn() {
-    print_message "Updating Yarn" "$info_color"
+clear_cache_user_cache() {
+    print_message "Clearing User Cache" "$info_color"
+    # print yellow message saying it will remove all files in the trash and it is not reversible
+    print_message "This will remove all files in the User Cache and it is not reversible" "$warning_color"
+    read -p "Do you want to continue? (y/n): " confirm
+    [[ $confirm != "y" ]] && return 1
     {
-        yarn set version latest
+        echo "Clearing Cache"
+        sudo rm -rvf /Library/Caches/*
+        echo "---------------------------------"
+        echo "---------------------------------"
+        echo "Clearing User Cache"
+        rm -rvf ~/Library/Caches/*/
     } || {
-        print_message "Error updating Yarn" "$error_color"
+        print_message "Error clearing User Cache" "$error_color"
         return 1
     }
 }
@@ -164,11 +178,12 @@ update_npm_packages() {
 
 # Function for full update and cleanup
 full_update_cleanup() {
+    clear_trash
+    clear_cache_user_cache
     update_homebrew
     cleanup_homebrew
     check_issues
     update_nvm_node
-    update_yarn
     update_npm_packages
 }
 
@@ -192,7 +207,7 @@ handle_choice() {
             update_nvm_node
             ;;
         6)
-            update_yarn
+            return 1
             ;;
         7)
             update_npm_packages
